@@ -104,8 +104,11 @@ jobs:
           mv build/ORPHEUS.ipa "build/ORPHEUS-${{ steps.build.outputs.version }}.ipa"
 
           # Quoted delimiter: the shell must not expand anything here. Actions
-          # has already substituted the ${{ }} expressions, so the notes get real
-          # values without the backticks below being run as commands.
+          # substitutes its own expressions before the shell runs, so the notes
+          # still get real values while the backticks below stay literal.
+          #
+          # Note: an empty expression written literally in a run block is a
+          # workflow-level syntax error, comments included. Do not write one here.
           cat >build/notes.md <<'NOTES'
           ORPHEUS ${{ steps.build.outputs.version }} (build ${{ steps.build.outputs.build }})
 

@@ -16,6 +16,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Catches workflow-level mistakes in seconds instead of a 4-minute macOS run.
+  # Added after an empty expression written inside a shell comment in a run block
+  # silently invalidated an entire workflow file.
+  lint-workflows:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Run actionlint
+        env:
+          # Pinned rather than fetched from `latest`, and downloaded as a release
+          # artifact rather than piping a remote script into bash.
+          ACTIONLINT_VERSION: "1.7.12"
+        run: |
+          curl -sSfL -o actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          tar xzf actionlint.tar.gz actionlint
+          ./actionlint -color
+
   build-test:
     name: Build & Test (Xcode ${{ github.event.inputs.xcode_version || '26.6' }})
     # macos-26 is arm64 and GA since 2026-02-26. It is the only image family

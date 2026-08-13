@@ -111,16 +111,19 @@ public struct EncryptedBlobHeader: Sendable, Equatable {
 
 extension Data {
 
+    // `Swift.` qualification is required: inside a `Data` extension the bare
+    // name resolves to Data's own `withUnsafeBytes` instance method, not the
+    // global `withUnsafeBytes(of:_:)`.
     mutating func appendBigEndian(_ value: UInt16) {
-        withUnsafeBytes(of: value.bigEndian) { append(contentsOf: $0) }
+        Swift.withUnsafeBytes(of: value.bigEndian) { append(contentsOf: $0) }
     }
 
     mutating func appendBigEndian(_ value: UInt32) {
-        withUnsafeBytes(of: value.bigEndian) { append(contentsOf: $0) }
+        Swift.withUnsafeBytes(of: value.bigEndian) { append(contentsOf: $0) }
     }
 
     mutating func appendBigEndian(_ value: UInt64) {
-        withUnsafeBytes(of: value.bigEndian) { append(contentsOf: $0) }
+        Swift.withUnsafeBytes(of: value.bigEndian) { append(contentsOf: $0) }
     }
 
     /// Reads a big-endian integer at a logical offset from `startIndex`.

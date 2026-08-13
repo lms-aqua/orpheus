@@ -1,0 +1,19 @@
+# This project is authored on Windows and built on macOS runners. Without this,
+# CRLF leaks into shell scripts and they fail on the runner with
+# "bad interpreter: /bin/bash^M".
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.swift text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.plist text eol=lf
+*.entitlements text eol=lf
+*.xcstrings text eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary

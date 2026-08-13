@@ -1,0 +1,172 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "error.authentication_failed" : {
+      "comment" : "Shown when encrypted content fails its authentication tag check.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This content could not be decrypted. It may have been altered, or it belongs to a different vault."
+          }
+        }
+      }
+    },
+    "error.could_not_create_file" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The file could not be created."
+          }
+        }
+      }
+    },
+    "error.could_not_read_file" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The file could not be read."
+          }
+        }
+      }
+    },
+    "error.file_not_found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The file could not be found."
+          }
+        }
+      }
+    },
+    "error.integrity_check_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This encrypted file failed its integrity check."
+          }
+        }
+      }
+    },
+    "error.malformed_blob_header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This encrypted file is damaged."
+          }
+        }
+      }
+    },
+    "error.not_an_orpheus_blob" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file is not ORPHEUS encrypted content."
+          }
+        }
+      }
+    },
+    "error.recovery.restore_from_archive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you have an ORPHEUS archive containing this item, you can restore it."
+          }
+        }
+      }
+    },
+    "error.recovery.unlock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock ORPHEUS and try again."
+          }
+        }
+      }
+    },
+    "error.recovery.update_app" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update ORPHEUS to open this content."
+          }
+        }
+      }
+    },
+    "error.seal_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not encrypt this content."
+          }
+        }
+      }
+    },
+    "error.trailing_blob_data" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This encrypted file has unexpected extra data."
+          }
+        }
+      }
+    },
+    "error.truncated_blob" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This encrypted file is incomplete."
+          }
+        }
+      }
+    },
+    "error.unsupported_blob_version" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This content was saved by a newer version of ORPHEUS (format %lld)."
+          }
+        }
+      }
+    },
+    "error.vault_locked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ORPHEUS is locked."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

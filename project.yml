@@ -1,0 +1,106 @@
+# ORPHEUS — XcodeGen project definition.
+#
+# This file is the source of truth for the Xcode project. ORPHEUS.xcodeproj is
+# generated (and gitignored) so the target graph stays reviewable as text.
+#
+#   brew install xcodegen && xcodegen generate
+#
+name: ORPHEUS
+
+options:
+  bundleIdPrefix: com.lostmediastudios
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: false
+  minimumXcodeGenVersion: "2.42.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+packages:
+  OrpheusCore:
+    path: Packages/OrpheusCore
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    # Warnings are reviewed, not suppressed (see §59). We deliberately do NOT
+    # set SWIFT_TREAT_WARNINGS_AS_ERRORS, so CI can surface them without
+    # blocking, and we deliberately do NOT disable any warning groups.
+    CLANG_WARN_DOCUMENTATION_COMMENTS: YES
+    GCC_WARN_UNINITIALIZED_AUTOS: YES
+    RUN_DOCUMENTATION_COMPILER: NO
+  configs:
+    Debug:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+      ONLY_ACTIVE_ARCH: YES
+    Release:
+      SWIFT_COMPILATION_MODE: wholemodule
+      VALIDATE_PRODUCT: YES
+
+targets:
+  ORPHEUS:
+    type: application
+    platform: iOS
+    sources:
+      - path: ORPHEUS
+    dependencies:
+      - package: OrpheusCore
+        product: OrpheusCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lostmediastudios.orpheus
+        PRODUCT_NAME: ORPHEUS
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: ORPHEUS/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ORPHEUS/Resources/ORPHEUS.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SUPPORTS_MACCATALYST: NO
+        # iOS 26 concurrency defaults: UI code is MainActor-isolated unless it
+        # opts out, which is what a SwiftUI app actually wants.
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+
+  OrpheusCoreTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/OrpheusCoreTests
+    dependencies:
+      - package: OrpheusCore
+        product: OrpheusCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lostmediastudios.orpheus.coretests
+        GENERATE_INFOPLIST_FILE: YES
+        # Hostless logic tests: the core library has no UI and needs no app
+        # host, which keeps the security test suite fast and deterministic.
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+
+schemes:
+  ORPHEUS:
+    build:
+      targets:
+        ORPHEUS: all
+        OrpheusCoreTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      coverageTargets:
+        - package: OrpheusCore/OrpheusCore
+      targets:
+        - OrpheusCoreTests
+    archive:
+      config: Release

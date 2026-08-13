@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      xcode_version:
+        description: "Xcode 26.x version to build with (e.g. 26.6, 26.4.1)"
+        required: false
+        default: "26.6"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build & Test (Xcode ${{ github.event.inputs.xcode_version || '26.6' }})
+    # macos-26 is arm64 and GA since 2026-02-26. It is the only image family
+    # carrying the iOS 26 SDK that ORPHEUS targets.
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    env:
+      ORPHEUS_XCODE_VERSION: ${{ github.event.inputs.xcode_version || '26.6' }}
+      NSUnbufferedIO: YES
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Select Xcode 26
+        run: |
+          chmod +x Scripts/*.sh
+          ./Scripts/select-xcode.sh
+
+      - name: Toolchain summary
+        run: |
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR"
+          xcodebuild -version
+          swift --version
+          echo "--- iOS SDKs ---"
+          xcodebuild -showsdks | grep -i ios || true
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          xcodegen generate --spec project.yml
+          echo "--- Targets ---"
+          xcodebuild -project ORPHEUS.xcodeproj -list
+
+      - name: Resolve simulator destination
+        id: sim
+        run: ./Scripts/resolve-simulator.sh
+
+      - name: Build for testing
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild build-for-testing \
+            -project ORPHEUS.xcodeproj \
+            -scheme ORPHEUS \
+            -configuration Debug \
+            -destination "${{ steps.sim.outputs.destination }}" \
+            -resultBundlePath build/Build.xcresult \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            2>&1 | tee build/build.log
+
+      - name: Run tests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project ORPHEUS.xcodeproj \
+            -scheme ORPHEUS \
+            -configuration Debug \
+            -destination "${{ steps.sim.outputs.destination }}" \
+            -resultBundlePath build/Test.xcresult \
+            -derivedDataPath build/DerivedData \
+            2>&1 | tee build/test.log
+
+      # Warnings are reported, not suppressed, and not treated as failures.
+      # A visible count keeps §59 honest without blocking iteration.
+      - name: Warning summary
+        if: always()
+        run: |
+          if [[ -f build/build.log ]]; then
+            count=$(grep -c ": warning:" build/build.log || true)
+            echo "### Compiler warnings: ${count}" >>"$GITHUB_STEP_SUMMARY"
+            if [[ "${count}" != "0" ]]; then
+              echo '```' >>"$GITHUB_STEP_SUMMARY"
+              grep ": warning:" build/build.log | sort -u | head -50 >>"$GITHUB_STEP_SUMMARY"
+              echo '```' >>"$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+      - name: Simulator used
+        if: always()
+        run: |
+          echo "Simulator: ${{ steps.sim.outputs.name }}" >>"$GITHUB_STEP_SUMMARY"
+          echo "Runtime: ${{ steps.sim.outputs.runtime }}" >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Upload logs and result bundles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            build/*.log
+            build/*.xcresult
+          retention-days: 7
+          if-no-files-found: warn

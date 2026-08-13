@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Every file ORPHEUS creates defaults to Data Protection class A
+	     (complete): unreadable while the device is locked. Individual blobs
+	     that must survive a lock mid-write are downgraded explicitly to
+	     completeUnlessOpen at creation time, never globally. -->
+	<key>com.apple.developer.default-data-protection</key>
+	<string>NSFileProtectionComplete</string>
+</dict>
+</plist>

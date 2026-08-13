@@ -11,6 +11,15 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Working toward **ORPHEUS 1.0**. See the phase table in
 [README.md](README.md#status) for scope.
 
+## [0.1.0] — 2026-08-13
+
+Foundation preview. The encryption layer is implemented and tested; storage and
+authentication are not finished, so **this build cannot save anything yet**. It
+was published to exercise the release and distribution pipeline end to end.
+
+Verified: built by Xcode 26.6 against the iOS 26.5 SDK, `MinimumOSVersion 26.0`,
+universal iPhone/iPad, 28 tests passing, zero compiler warnings.
+
 ### Added
 
 - **Project foundation.** XcodeGen-generated Xcode project defined in

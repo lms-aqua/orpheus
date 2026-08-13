@@ -1,0 +1,12 @@
+C:\LOST\ORPHEUS\.github\workflows\ci.yml
+C:\LOST\ORPHEUS\.github\workflows\release.yml
+C:\LOST\ORPHEUS\ARCHITECTURE.md
+C:\LOST\ORPHEUS\AltStore\index.html
+C:\LOST\ORPHEUS\CHANGELOG.md
+C:\LOST\ORPHEUS\README.md
+C:\LOST\ORPHEUS\SECURITY.md
+C:\LOST\ORPHEUS\docs\BUILD_STATUS.md
+C:\LOST\ORPHEUS\docs\MASTER_PROMPT.md
+C:\LOST\ORPHEUS\docs\SIDELOADING.md
+C:\LOST\ORPHEUS\project.yml
+C:\LOST\ORPHEUS\ORPHEUS\Resources\Assets.xcassets\AppIcon.appiconset\AppIcon.png

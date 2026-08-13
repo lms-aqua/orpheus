@@ -115,6 +115,27 @@ To republish the source without a new build — after editing app metadata in
 `AltStore/source-template.json`, for example — run the workflow manually with
 **Run workflow** and `publish_source` enabled.
 
+### One-time repository setup
+
+Two things are repository configuration rather than code, so a fork will not
+inherit them:
+
+1. **Pages must be set to build from a workflow**, not from a branch:
+
+   ```bash
+   gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow
+   ```
+
+2. **The `github-pages` environment must permit tag deployments.** By default it
+   allows only the default branch, so a Pages deploy from a `v*` tag is rejected
+   before any step runs — the job fails in about a second with no log, which is
+   easy to misread as a script error:
+
+   ```bash
+   gh api -X POST repos/OWNER/REPO/environments/github-pages/deployment-branch-policies \
+     -f name='v*' -f type=tag
+   ```
+
 ### Verifying a download
 
 Each release records the SHA-256 of its `.ipa`:

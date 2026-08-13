@@ -121,6 +121,26 @@ is pinned; GitHub prunes simulator runtimes for disk space so destinations are
 resolved live rather than hardcoded; and `.gitattributes` forces `eol=lf` because
 Windows CRLF makes runner shell scripts fail with `bad interpreter: /bin/bash^M`.
 
+### Distribution — IPA and AltStore
+
+Verified end to end by release
+[v0.1.0](https://github.com/lms-aqua/orpheus/releases/tag/v0.1.0):
+
+- Unsigned `.ipa` built in Release configuration against the device SDK
+- Published SHA-256 matches the downloaded asset
+- Bundle validated: single `Payload/` root, `MinimumOSVersion 26.0`, universal
+  iPhone/iPad, `DTSDKName iphoneos26.5`, `DTXcodeBuild 17F113` (Xcode 26.6)
+- AltStore source live at `https://lms-aqua.github.io/orpheus/altstore.json`,
+  served as `application/json`, with versions derived from release history so it
+  cannot advertise an asset that does not exist
+- Landing page and icon served from Pages
+
+Unsigned deliberately — AltStore re-signs on-device with the owner's Apple ID, so
+storing a certificate in repository secrets would add risk and buy nothing. The
+cost is documented in [SIDELOADING.md](SIDELOADING.md#5-what-sideloading-costs-precisely):
+an unsigned build loses the app-wide Data Protection default, which leaves content
+encryption intact but drops the metadata store to the system default class.
+
 ### Shell and design system (partial)
 
 - Adaptive navigation: one `TabView` with `.tabViewStyle(.sidebarAdaptable)` —

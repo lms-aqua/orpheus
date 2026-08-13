@@ -28,3 +28,6 @@ Packages/*/.build/
 *.p12
 *.cer
 Signing.local.xcconfig
+
+# graphify local index cache — regenerated on demand, not project content
+graphify-out/

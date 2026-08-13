@@ -1,12 +1,11 @@
 {
   "name": "ORPHEUS",
   "identifier": "com.lostmediastudios.orpheus.source",
-  "apiVersion": "v2",
+  "sourceURL": "https://lms-aqua.github.io/orpheus/altstore.json",
   "subtitle": "A private personal workspace and encrypted vault.",
   "description": "Official source for ORPHEUS — one private place for notes, documents, photos, recordings, and records, organised into encrypted Spaces and stored on your own device.",
   "website": "https://github.com/lms-aqua/orpheus",
   "tintColor": "5268D8",
-  "nsfw": false,
   "featuredApps": ["com.lostmediastudios.orpheus"],
   "apps": [
     {
@@ -14,15 +13,14 @@
       "bundleIdentifier": "com.lostmediastudios.orpheus",
       "developerName": "Lost Media Studios",
       "subtitle": "Private workspace and encrypted vault",
-      "category": "productivity",
+      "category": "utilities",
       "tintColor": "5268D8",
+      "screenshotURLs": [],
       "localizedDescription": "ORPHEUS is one private place for the things you would rather not scatter across Notes, Photos, Files, and half a dozen cloud services.\n\nNotes, documents, photos, videos, scans, recordings, links, and records — organised into encrypted Spaces, stored locally, encrypted at rest.\n\nLOCAL FIRST\nORPHEUS works with no account and no network connection. Nothing is uploaded anywhere.\n\nENCRYPTION\nContent is encrypted on your device with AES-256-GCM using Apple's CryptoKit. Every item is encrypted with its own key derived from a single vault key, so one item's key cannot open another. The vault key is stored in the iOS Keychain and never written into app settings, the database, or any file.\n\nWHAT IT DOES NOT CLAIM\nORPHEUS cannot protect content after you export or share it, and a compromised or jailbroken device can bypass app-level protection. There is no backdoor and no recovery key held elsewhere — if you lose the device and have no ORPHEUS archive, encrypted content cannot be recovered.\n\nThis is an in-development build. See the repository for what is implemented and what is not.",
       "versions": [],
       "appPermissions": {
         "entitlements": [],
-        "privacy": {
-          "NSFaceIDUsageDescription": "Unlocks your private vault."
-        }
+        "privacy": []
       }
     }
   ],

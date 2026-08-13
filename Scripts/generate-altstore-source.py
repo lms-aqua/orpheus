@@ -110,6 +110,9 @@ def build_versions(releases: list[dict], *, include_prereleases: bool) -> list[d
             "minOSVersion": metadata.get("minOS", DEFAULT_MIN_OS),
         }
 
+        if metadata.get("sha256"):
+            entry["sha256"] = metadata["sha256"]
+
         notes = human_notes(release.get("body"))
         if notes:
             entry["localizedDescription"] = notes
@@ -168,6 +171,19 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    # Mirror the newest version into the legacy top-level app fields. Both of
+    # Apple-sideloading's reference sources (apps.altstore.io, apps.sidestore.io)
+    # still publish these alongside `versions`, and older AltStore builds read
+    # them instead of the array. Omitting them is what makes a source fail to
+    # decode with "the data couldn't be read because it isn't in the correct
+    # format" on clients that expect the legacy shape.
+    latest = app["versions"][0]
+    app["version"] = latest["version"]
+    app["versionDate"] = latest["date"]
+    app["versionDescription"] = latest.get("localizedDescription", "")
+    app["downloadURL"] = latest["downloadURL"]
+    app["size"] = latest["size"]
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

@@ -182,23 +182,62 @@ jobs:
             --output site/altstore.json \
             --icon-url "https://lms-aqua.github.io/orpheus/icon.png"
 
+      # These assertions encode a real failure: an earlier source deployed and
+      # served fine, then AltStore rejected it with "the data couldn't be read
+      # because it isn't in the correct format" -- a Swift decoding error. The
+      # shape checks below are taken from apps.altstore.io, which is known to
+      # decode, rather than from prose documentation.
       - name: Validate source JSON
         run: |
           python3 - <<'PY'
-          import json, sys
+          import json
           source = json.load(open("site/altstore.json"))
           app = source["apps"][0]
           versions = app["versions"]
-          # A source that parses but describes nothing installable is the failure
-          # mode worth guarding: AltStore would show a broken app entry.
+
           assert versions, "no versions"
+          for key in ("name", "identifier"):
+              assert source.get(key), f"source missing {key}"
           for key in ("name", "bundleIdentifier", "developerName", "iconURL", "localizedDescription"):
               assert app.get(key), f"app missing {key}"
+
+          # `apiVersion` is absent from the reference sources. Setting it appears
+          # to select a stricter decoder, so keep it out.
+          assert "apiVersion" not in source, "apiVersion must be omitted"
+
+          # Category is a decoded enum, not free text. 'utilities' is copied
+          # from apps.altstore.io; 'productivity' is NOT a valid case and made
+          # the whole source fail to decode.
+          allowed = {
+              "developer", "entertainment", "games", "lifestyle",
+              "photo-video", "social", "utilities", "other",
+          }
+          if "category" in app:
+              assert app["category"] in allowed, f"invalid category {app['category']!r}"
+
+          # appPermissions.privacy is an ARRAY of objects, not a dictionary.
+          # Passing a dictionary here is what broke decoding originally.
+          perms = app.get("appPermissions", {})
+          assert isinstance(perms.get("entitlements", []), list), "entitlements must be a list"
+          assert isinstance(perms.get("privacy", []), list), "privacy must be a list, not a dict"
+          for item in perms.get("entitlements", []):
+              assert isinstance(item, dict) and item.get("name"), "entitlement must be {name: ...}"
+          for item in perms.get("privacy", []):
+              assert isinstance(item, dict) and item.get("name"), "privacy entry must be {name: ...}"
+
+          # Legacy top-level mirror, which older clients read instead of versions[].
+          for key in ("version", "versionDate", "downloadURL", "size"):
+              assert app.get(key) not in (None, ""), f"app missing legacy {key}"
+          assert app["version"] == versions[0]["version"], "legacy version out of sync"
+          assert app["downloadURL"] == versions[0]["downloadURL"], "legacy downloadURL out of sync"
+          assert app["size"] == versions[0]["size"], "legacy size out of sync"
+
           for v in versions:
               for key in ("version", "buildVersion", "date", "downloadURL", "size"):
                   assert v.get(key) not in (None, ""), f"version {v.get('version')} missing {key}"
-              assert v["size"] > 0, "zero-size asset"
-          print(f"OK — {len(versions)} version(s), latest {versions[0]['version']}")
+              assert isinstance(v["size"], int) and v["size"] > 0, "size must be a positive int"
+
+          print(f"OK - {len(versions)} version(s), latest {versions[0]['version']}")
           PY
 
       - name: Configure Pages

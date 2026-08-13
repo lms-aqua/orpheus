@@ -113,12 +113,14 @@ jobs:
         run: |
           if [[ -f build/build.log ]]; then
             count=$(grep -c ": warning:" build/build.log || true)
-            echo "### Compiler warnings: ${count}" >>"$GITHUB_STEP_SUMMARY"
-            if [[ "${count}" != "0" ]]; then
-              echo '```' >>"$GITHUB_STEP_SUMMARY"
-              grep ": warning:" build/build.log | sort -u | head -50 >>"$GITHUB_STEP_SUMMARY"
-              echo '```' >>"$GITHUB_STEP_SUMMARY"
-            fi
+            {
+              echo "### Compiler warnings: ${count}"
+              if [[ "${count}" != "0" ]]; then
+                echo '```'
+                grep ": warning:" build/build.log | sort -u | head -50
+                echo '```'
+              fi
+            } >>"$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Simulator used

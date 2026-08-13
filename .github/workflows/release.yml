@@ -144,7 +144,11 @@ jobs:
   # ---------------------------------------------------------------------------
   altstore-source:
     name: Publish AltStore source
-    if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.publish_source)
+    # `github.event.inputs.*`, not `inputs.*`: the bare `inputs` context exists
+    # only for reusable workflow_call workflows, and referencing it here makes
+    # GitHub reject the whole file as an unrecognized named-value.
+    # workflow_dispatch booleans arrive as the strings 'true'/'false'.
+    if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_source == 'true')
     needs: [ipa]
     runs-on: ubuntu-latest
     timeout-minutes: 10

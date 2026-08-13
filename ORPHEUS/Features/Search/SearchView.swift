@@ -1,20 +1,21 @@
+import OrpheusCore
+import SwiftData
 import SwiftUI
 
-/// Search across every Space.
-///
-/// The index and filters land in the discovery phase. What is here now is the
-/// real search presentation and its two genuine zero-states — no query typed,
-/// and a query with no matches — which are the states most often left broken.
+/// Searches queryable entry metadata without decrypting every body.
 struct SearchView: View {
-
+    @Query(sort: \Entry.updatedAt, order: .reverse) private var entries: [Entry]
     @State private var query = ""
 
-    private var results: [String] { [] }
+    private var results: [Entry] {
+        guard !query.isEmpty else { return [] }
+        return entries.filter { $0.title.localizedStandardContains(query) }
+    }
 
     var body: some View {
-        List {
-            ForEach(results, id: \.self) { result in
-                Text(result)
+        List(results) { entry in
+            NavigationLink(entry.title) {
+                SearchNoteDetailView(entry: entry)
             }
         }
         .listStyle(.plain)
@@ -23,17 +24,61 @@ struct SearchView: View {
                 ContentUnavailableView {
                     Label("Search ORPHEUS", systemImage: "magnifyingglass")
                 } description: {
-                    Text("Find notes, files, photos, and recordings by title, text, or tag.")
+                    Text("Find encrypted notes by title.")
                 }
             } else if results.isEmpty {
                 ContentUnavailableView.search(text: query)
             }
         }
-        .searchable(text: $query, prompt: "Search notes, files, and tags")
+        .searchable(text: $query, prompt: "Search note titles")
         .navigationTitle("Search")
+    }
+}
+
+private struct SearchNoteDetailView: View {
+    let entry: Entry
+    @State private var text = ""
+    @State private var failure: String?
+    @State private var isLoading = true
+
+    var body: some View {
+        Group {
+            if let failure {
+                ContentUnavailableView(
+                    "Couldn’t open note",
+                    systemImage: "exclamationmark.lock",
+                    description: Text(failure)
+                )
+            } else if isLoading {
+                ProgressView("Unlocking note…")
+            } else {
+                ScrollView {
+                    Text(text.isEmpty ? "This note is empty." : text)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .textSelection(.enabled)
+                }
+            }
+        }
+        .navigationTitle(entry.title)
+        .task {
+            do {
+                let store = try await VaultAccess.blobStore()
+                let data = try await store.load(
+                    id: entry.id,
+                    for: .entryPayload(entry.id),
+                    expectedDigest: entry.blobDigest
+                )
+                text = String(decoding: data, as: UTF8.self)
+            } catch {
+                failure = error.localizedDescription
+            }
+            isLoading = false
+        }
     }
 }
 
 #Preview("Search — no query") {
     NavigationStack { SearchView() }
+        .modelContainer(for: Entry.self, inMemory: true)
 }

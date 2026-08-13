@@ -57,6 +57,42 @@
         }
       }
     },
+    "error.invalid_master_key" : {
+      "comment" : "Shown when the Keychain item does not contain a valid ORPHEUS vault key.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The vault key stored on this device is invalid."
+          }
+        }
+      }
+    },
+    "error.keychain_access_control_unavailable" : {
+      "comment" : "Shown when iOS cannot create the requested user-presence protection for the vault key.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ORPHEUS could not protect the vault key with device authentication."
+          }
+        }
+      }
+    },
+    "error.keychain_failure" : {
+      "comment" : "Generic user-facing message for a Keychain Services failure; never includes the OSStatus value.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The vault key could not be accessed securely."
+          }
+        }
+      }
+    },
     "error.malformed_blob_header" : {
       "extractionState" : "manual",
       "localizations" : {

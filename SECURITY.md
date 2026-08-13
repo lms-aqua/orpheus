@@ -148,8 +148,9 @@ key; locking releases it. When no device passcode is set, that access control
 cannot be applied, and ORPHEUS reports the weaker state accurately in Settings
 rather than implying protection it does not have.
 
-*Key storage is specified here and lands with the authentication work in
-Phase 1; the encryption layer it protects is implemented and tested.*
+*The key-storage implementation and its in-memory test boundary are present in
+the current working tree. CI compilation and real-device access-control
+verification are still required before this section is considered shipped.*
 
 ---
 

@@ -11,6 +11,26 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Working toward **ORPHEUS 1.0**. See the phase table in
 [README.md](README.md#status) for scope.
 
+### Added
+
+- **Vault master-key storage (awaiting CI verification).** Added a
+  `MasterKeyStoring` boundary, device-bound Keychain implementation, and
+  actor-isolated in-memory implementation. Devices with a passcode use
+  `WhenPasscodeSetThisDeviceOnly` plus user-presence access control; devices
+  without one report the weaker `WhenUnlockedThisDeviceOnly` fallback rather
+  than claiming biometric protection.
+- **Master-key lifecycle tests.** Hostless tests cover stable creation,
+  injected keys, deletion and rotation, and honest protection-state reporting
+  without touching the simulator's real Keychain.
+- **First working persistence slice (awaiting CI verification).** Added
+  SwiftData-backed `Entry` and `Space` metadata, an actor-isolated `BlobStore`
+  that publishes encrypted files through staging writes, and app flows to
+  create and reopen encrypted notes, search note titles, and create or delete
+  Spaces. Note bodies never enter SwiftData.
+- **Encrypted blob lifecycle tests.** Added round-trip, replacement,
+  purpose-isolation, ciphertext/plaintext separation, and idempotent deletion
+  coverage for `BlobStore`.
+
 ## [0.1.0] — 2026-08-13
 
 Foundation preview. The encryption layer is implemented and tested; storage and

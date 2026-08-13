@@ -175,23 +175,24 @@ rather than assumed: `Tab(_:systemImage:value:role:)`,
 
 ## 3. Not complete
 
-### Phase 1 — remaining (the app cannot yet save anything)
+### Phase 1 — remaining (first save slice awaiting CI verification)
 
 | Missing | Spec |
 |---|---|
-| `MasterKeyStore` — Keychain storage with user-presence access control | §15 |
+| `MasterKeyStore` — implementation and hostless tests are present locally; CI compilation and real-device access-control verification remain | §15 |
 | Biometric authentication, lock screen, onboarding | §16, §48 |
 | `LockController` — auto-lock intervals, scene-phase handling | §16 |
-| SwiftData model graph — `Space`, `Entry`, `Attachment`, `Tag`, `ActivityRecord` | §21 |
-| `BlobStore` — encrypted blob lifecycle on disk | §20 |
-| Spaces create / rename / reorder / customise / archive / delete | §9 |
-| Home wired to real recent, favourite, and pinned content | §7 |
+| Complete SwiftData model graph — `Space` and `Entry` are present locally; `Attachment`, `Tag`, and `ActivityRecord` remain | §21 |
+| Finish verifying `BlobStore` — encrypted staging writes, reads, replacement, deletion, and hostless tests are present locally | §20 |
+| Spaces rename / reorder / customise / archive; create, list, and delete are present locally | §9 |
+| Expand Home beyond the local encrypted-note create/read slice to favourites, pinning, and Spaces | §7 |
 | Typography and motion tokens; component library | §40 |
 
-**Consequence:** the encryption layer is real and tested, but nothing is wired to
-persistence yet, so there is currently no way to create or store an Entry. The
-UI shows genuine empty states rather than fake data — which is correct per §49,
-but it is an empty app.
+**Consequence:** the current working tree now has the first end-to-end path:
+create a note, encrypt its body into a blob, persist only its metadata, reopen
+it, and search its title. Spaces can also be created and deleted. This path is
+not counted as verified until it compiles and its expanded test suite passes in
+CI; editing, attachments, full Space assignment, and locking still remain.
 
 ### Phases 2–6 — not started
 
@@ -207,15 +208,15 @@ but it is an empty app.
 
 | Requirement | State |
 |---|---|
-| Encrypted local storage | ◐ Cipher done and tested; storage layer not built |
+| Encrypted local storage | ◐ Cipher verified; first `BlobStore` slice present locally and awaiting CI |
 | Onboarding | ○ |
 | Biometric / device authentication | ○ |
-| Spaces | ◐ Empty state only |
-| Notes, rich text | ○ |
+| Spaces | ◐ Create/list/delete present locally; remaining management pending |
+| Notes, rich text | ◐ Basic encrypted plain-text create/read present locally; editing and rich text pending |
 | Photos, files, document scanning, audio recording | ○ |
 | Links, optional locations | ○ |
 | Favourites, pinning, tags | ○ |
-| Search | ◐ Presentation and zero-states only |
+| Search | ◐ Local title search present; content/tag indexing pending |
 | Recently Deleted | ○ |
 | Import, export, ORPHEUS encrypted archive | ○ |
 | Privacy screen, auto-lock, Lock Now | ○ |
@@ -239,13 +240,13 @@ retrofit safely.
 In dependency order. Each lands with tests and a green CI run before the next
 begins.
 
-1. **`MasterKeyStore`** — Keychain generic-password item, `ThisDeviceOnly`, with
-   `SecAccessControl` requiring user presence where a device passcode exists.
-   Behind a `MasterKeyStoring` protocol with an in-memory implementation, so
-   tests stay hostless and no test touches the real Keychain. Must report the
-   weaker state honestly when no passcode is set (§68).
-2. **SwiftData model graph + `BlobStore`** — metadata in SwiftData, ciphertext in
-   blobs, no binary in the model graph (§20, §21).
+1. **Verify the first persistence slice** — compile `MasterKeyStore`, the
+   SwiftData `Entry`/`Space` models, `BlobStore`, and the create/read/search UI;
+   run all old and new hostless tests in CI. Real-device access-control
+   verification remains a later hardware gate (§15, §20, §21, §68).
+2. **Complete the model graph and note lifecycle** — add attachments, tags,
+   activity records, edit/delete behavior, and Space assignment while keeping
+   bodies and binary data out of SwiftData (§9, §20, §21).
 3. **Lock and onboarding** — `LockController` with the five auto-lock intervals,
    scene-phase transitions, biometric unlock, three-screen onboarding (§16, §48).
 4. **Spaces CRUD + Home wired to real data** — completing Phase 1 (§7, §9).

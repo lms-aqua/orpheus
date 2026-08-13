@@ -7,5 +7,6 @@ struct OrpheusApp: App {
         WindowGroup {
             RootView()
         }
+        .modelContainer(for: [Entry.self, Space.self])
     }
 }

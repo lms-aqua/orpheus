@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 /// Errors surfaced by the ORPHEUS core layer.
 ///
@@ -21,6 +22,17 @@ public enum OrpheusError: Error, LocalizedError, Equatable, Sendable {
 
     /// The vault is locked, so no key is available to decrypt with.
     case vaultLocked
+
+    /// Keychain Services rejected a vault-key operation. The status is retained
+    /// for diagnostics but never interpolated into a user-visible string.
+    case keychainFailure(OSStatus)
+
+    /// A Keychain item existed but did not contain a valid 256-bit master key.
+    case invalidMasterKey
+
+    /// iOS reported that user-presence protection was available but could not
+    /// create the corresponding access-control object.
+    case keychainAccessControlUnavailable
 
     // MARK: Encrypted blob format
 
@@ -57,6 +69,12 @@ public enum OrpheusError: Error, LocalizedError, Equatable, Sendable {
             Self.string("error.authentication_failed")
         case .vaultLocked:
             Self.string("error.vault_locked")
+        case .keychainFailure:
+            Self.string("error.keychain_failure")
+        case .invalidMasterKey:
+            Self.string("error.invalid_master_key")
+        case .keychainAccessControlUnavailable:
+            Self.string("error.keychain_access_control_unavailable")
         case .notAnOrpheusBlob:
             Self.string("error.not_an_orpheus_blob")
         case .unsupportedBlobVersion(let version):

@@ -42,6 +42,23 @@ Working toward **ORPHEUS 1.0**. See the phase table in
   followed by test-without-building, warning counts surfaced in the job summary,
   and logs plus result bundles uploaded as artifacts.
 
+- **Unsigned IPA build** (`Scripts/make-unsigned-ipa.sh`). Release-configuration
+  device archive built with signing disabled, packaged as `Payload/ORPHEUS.app`.
+  Deliberately unsigned: AltStore re-signs on-device with the owner's Apple ID,
+  so storing a certificate in repository secrets would add risk and buy nothing.
+- **AltStore distribution.** `IPA & AltStore` workflow builds the IPA on every
+  push to `main` as an artifact, and on a `v*` tag cuts a GitHub Release,
+  regenerates the AltStore source from the **full release history** via the API,
+  validates it, and deploys it to GitHub Pages. Deriving versions from releases
+  rather than a hand-maintained file means the source can never advertise an
+  asset that does not exist.
+- **Sideloading documentation** (`docs/SIDELOADING.md`) with an explicit
+  before/after table of what an unsigned build loses, and a warning that deleting
+  a sideloaded app destroys its encrypted container.
+- **Specification and status documents** (`docs/MASTER_PROMPT.md`,
+  `docs/BUILD_STATUS.md`) recording the acceptance criteria and honest progress
+  against them.
+
 ### Security
 
 - Files are created with Data Protection. The app defaults to

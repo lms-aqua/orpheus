@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORPHEUS — AltStore Source</title>
+<style>
+  :root {
+    --bg: #14151b;
+    --raised: #1d1f27;
+    --text: #eeeff4;
+    --muted: #9a9daa;
+    --accent: #7a8eff;
+    --line: #2a2d38;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.25rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 34rem; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 2.5rem; }
+  img.icon {
+    width: 104px; height: 104px;
+    border-radius: 23%;
+    display: block; margin: 0 auto 1.25rem;
+  }
+  h1 { font-size: 1.75rem; margin: 0 0 .35rem; letter-spacing: -.02em; }
+  .tagline { color: var(--muted); margin: 0; }
+  .actions { display: grid; gap: .75rem; margin: 0 0 2rem; }
+  a.button {
+    display: block; padding: .9rem 1.25rem;
+    background: var(--accent); color: #10121a;
+    border-radius: 14px; text-decoration: none;
+    font-weight: 600; text-align: center;
+  }
+  a.button.secondary { background: var(--raised); color: var(--text); border: 1px solid var(--line); }
+  section { background: var(--raised); border: 1px solid var(--line); border-radius: 16px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 .6rem; font-weight: 600; }
+  code {
+    display: block; word-break: break-all;
+    background: #10121a; border: 1px solid var(--line);
+    padding: .7rem .8rem; border-radius: 9px;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--accent);
+  }
+  ol, ul { margin: 0; padding-left: 1.25rem; }
+  li + li { margin-top: .4rem; }
+  p { margin: 0 0 .6rem; }
+  p:last-child, ul:last-child, ol:last-child { margin-bottom: 0; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  footer { text-align: center; margin-top: 2rem; }
+  footer a { color: var(--accent); }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f4f5f8; --raised:#fff; --text:#16171d; --muted:#5d6070; --accent:#4a5cd8; --line:#e2e4ea; }
+    code { background: #f7f8fb; }
+    a.button { color: #fff; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img class="icon" src="icon.png" alt="ORPHEUS app icon">
+    <h1>ORPHEUS</h1>
+    <p class="tagline">A private personal workspace and encrypted vault.</p>
+  </header>
+
+  <div class="actions">
+    <a class="button" href="altstore://source?url=https://lms-aqua.github.io/orpheus/altstore.json">Add to AltStore</a>
+    <a class="button secondary" href="sidestore://source?url=https://lms-aqua.github.io/orpheus/altstore.json">Add to SideStore</a>
+  </div>
+
+  <section>
+    <h2>Source URL</h2>
+    <code>https://lms-aqua.github.io/orpheus/altstore.json</code>
+    <p class="muted" style="margin-top:.7rem">Paste this into AltStore &rarr; Browse &rarr; Sources &rarr; + if the buttons above do not open the app.</p>
+  </section>
+
+  <section>
+    <h2>Requirements</h2>
+    <ul>
+      <li><strong>iOS or iPadOS 26.0</strong> or later.</li>
+      <li>AltStore or SideStore installed, with AltServer or the SideStore pairing set up.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What sideloading means here</h2>
+    <p>These builds are <strong>unsigned</strong>. AltStore signs the app on your device with your own Apple ID, so no signing certificate is shared through this repository.</p>
+    <ul>
+      <li>With a <strong>free</strong> Apple ID, the app stops opening after <strong>7 days</strong> unless AltStore refreshes it.</li>
+      <li>With a <strong>paid</strong> Apple Developer account, it lasts <strong>1 year</strong>.</li>
+    </ul>
+    <p class="muted">Because entitlements are applied when an app is signed, a sideloaded ORPHEUS does not carry the app-wide Data Protection default. Encrypted content still sets its protection class explicitly, but the metadata database falls back to the system default class. This is a real difference from a properly signed build, and it is written down rather than glossed over.</p>
+  </section>
+
+  <section>
+    <h2>Status</h2>
+    <p>ORPHEUS is <strong>in development</strong>. The encryption layer is implemented and tested; storage, authentication, and the content types are not finished yet, so these builds cannot save anything.</p>
+    <p class="muted">Install them to look at the interface, not to keep anything in.</p>
+  </section>
+
+  <footer>
+    <p class="muted">
+      <a href="https://github.com/lms-aqua/orpheus">Source</a> &middot;
+      <a href="https://github.com/lms-aqua/orpheus/blob/main/SECURITY.md">Security</a> &middot;
+      <a href="https://github.com/lms-aqua/orpheus/blob/main/docs/BUILD_STATUS.md">Build status</a>
+    </p>
+  </footer>
+</main>
+</body>
+</html>

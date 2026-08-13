@@ -166,6 +166,22 @@ Phase 1; the encryption layer it protects is implemented and tested.*
 - A failed decryption deletes its partially written output. Half-decrypted
   plaintext left on disk would be unencrypted user content that nothing owns.
 
+### Sideloaded builds are weaker, specifically
+
+Entitlements are applied when an app is signed, and the `.ipa` files distributed
+for AltStore are **unsigned** so the owner's own Apple ID can sign them. A
+sideloaded install therefore does not carry the app-wide
+`NSFileProtectionComplete` default.
+
+Content encryption is unaffected — `ChunkedCipher` sets each blob's protection
+class explicitly rather than relying on the app-wide default — but the SwiftData
+metadata store falls back to the system default class, readable after first
+unlock rather than only while unlocked. Since metadata is already the weaker half
+of this model, that is a narrowing of an existing limitation rather than a new
+one, but it is a real difference from a properly signed build.
+
+See [docs/SIDELOADING.md](docs/SIDELOADING.md) for the full comparison.
+
 ---
 
 ## 6. Verification

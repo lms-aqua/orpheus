@@ -70,6 +70,26 @@ installed instead of hardcoding a device name. Hardcoded destinations are the
 most common reason iOS CI breaks: GitHub prunes simulator runtimes for disk
 space, and device names change every year.
 
+## Installing (AltStore / SideStore)
+
+Not on the App Store. Builds are unsigned `.ipa` files that AltStore signs on
+your device with your own Apple ID.
+
+```text
+https://lms-aqua.github.io/orpheus/altstore.json
+```
+
+Landing page with one-tap buttons: <https://lms-aqua.github.io/orpheus/>
+
+Free Apple ID installs last 7 days and need refreshing; a paid Developer account
+lasts a year. Read [docs/SIDELOADING.md](docs/SIDELOADING.md) first — it explains
+exactly what protection an unsigned build loses, and warns that deleting a
+sideloaded app deletes its encrypted container.
+
+Releases: `git tag v0.1.0 && git push origin v0.1.0` builds the IPA, cuts a
+release, regenerates the AltStore source from release history, and deploys it.
+Every push to `main` also produces an IPA as a workflow artifact.
+
 ## Layout
 
 ```text

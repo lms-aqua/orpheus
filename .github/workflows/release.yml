@@ -1,0 +1,216 @@
+name: IPA & AltStore
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      publish_source:
+        description: "Regenerate and publish the AltStore source from existing releases"
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build an unsigned .ipa. On a tag, also cut a GitHub Release and attach it.
+  # ---------------------------------------------------------------------------
+  ipa:
+    name: Build unsigned IPA
+    runs-on: macos-26
+    timeout-minutes: 45
+    permissions:
+      contents: write # required to create a release on a tag
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+      build: ${{ steps.build.outputs.build }}
+      sha256: ${{ steps.build.outputs.ipa_sha256 }}
+      size: ${{ steps.build.outputs.ipa_size }}
+
+    env:
+      NSUnbufferedIO: YES
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Select Xcode 26
+        run: |
+          chmod +x Scripts/*.sh
+          ./Scripts/select-xcode.sh
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            # v1.2.3 -> 1.2.3. AltStore compares these strings, so the v must go.
+            version="${GITHUB_REF_NAME#v}"
+          else
+            # Untagged builds are labelled from the project's own version plus
+            # the run number, so artifacts are never ambiguous.
+            version="$(grep -m1 'MARKETING_VERSION:' project.yml | sed -E 's/.*"([^"]+)".*/\1/')"
+          fi
+          echo "version=${version}" >>"$GITHUB_OUTPUT"
+          echo "Version: ${version} build ${GITHUB_RUN_NUMBER}"
+
+      - name: Build unsigned IPA
+        id: build
+        run: ./Scripts/make-unsigned-ipa.sh "${{ steps.version.outputs.version }}" "${{ github.run_number }}"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ORPHEUS-${{ steps.build.outputs.version }}-${{ steps.build.outputs.build }}-unsigned
+          path: build/ORPHEUS.ipa
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Build summary
+        run: |
+          {
+            echo "### Unsigned IPA"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | ${{ steps.build.outputs.version }} (${{ steps.build.outputs.build }}) |"
+            echo "| Minimum iOS | ${{ steps.build.outputs.min_os }} |"
+            echo "| Size | $(( ${{ steps.build.outputs.ipa_size }} / 1048576 )) MiB |"
+            echo "| SHA-256 | \`${{ steps.build.outputs.ipa_sha256 }}\` |"
+            echo ""
+            echo "Unsigned by design — AltStore signs on-device with your own Apple ID."
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      # The metadata block is what generate-altstore-source.py reads back to
+      # populate buildVersion and minOSVersion, so the published source can
+      # never disagree with the asset that was actually uploaded.
+      - name: Create release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mv build/ORPHEUS.ipa "build/ORPHEUS-${{ steps.build.outputs.version }}.ipa"
+
+          # Quoted delimiter: the shell must not expand anything here. Actions
+          # has already substituted the ${{ }} expressions, so the notes get real
+          # values without the backticks below being run as commands.
+          cat >build/notes.md <<'NOTES'
+          ORPHEUS ${{ steps.build.outputs.version }} (build ${{ steps.build.outputs.build }})
+
+          Install with AltStore or SideStore: https://lms-aqua.github.io/orpheus/
+
+          This build is **unsigned**. AltStore signs it on your device with your own
+          Apple ID — 7 days with a free account, 1 year with a paid one.
+
+          Requires iOS or iPadOS ${{ steps.build.outputs.min_os }} or later.
+
+          ```
+          SHA-256  ${{ steps.build.outputs.ipa_sha256 }}
+          ```
+
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+          for what changed and [docs/BUILD_STATUS.md](https://github.com/${{ github.repository }}/blob/main/docs/BUILD_STATUS.md)
+          for what is and is not implemented.
+
+          <!-- orpheus-metadata
+          build=${{ steps.build.outputs.build }}
+          minOS=${{ steps.build.outputs.min_os }}
+          sha256=${{ steps.build.outputs.ipa_sha256 }}
+          -->
+          NOTES
+
+          gh release create "${GITHUB_REF_NAME}" \
+            "build/ORPHEUS-${{ steps.build.outputs.version }}.ipa" \
+            --title "ORPHEUS ${{ steps.build.outputs.version }}" \
+            --notes-file build/notes.md \
+            --verify-tag
+
+  # ---------------------------------------------------------------------------
+  # Regenerate the AltStore source from the release history and publish it.
+  # Runs on ubuntu: it only reads the API and writes JSON, so paying for a
+  # macOS runner here would be waste.
+  # ---------------------------------------------------------------------------
+  altstore-source:
+    name: Publish AltStore source
+    if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.publish_source)
+    needs: [ipa]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Assemble site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p site
+          cp AltStore/index.html site/index.html
+          cp ORPHEUS/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png site/icon.png
+
+          gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate >releases.json
+
+          python3 Scripts/generate-altstore-source.py \
+            --releases releases.json \
+            --output site/altstore.json \
+            --icon-url "https://lms-aqua.github.io/orpheus/icon.png"
+
+      - name: Validate source JSON
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          source = json.load(open("site/altstore.json"))
+          app = source["apps"][0]
+          versions = app["versions"]
+          # A source that parses but describes nothing installable is the failure
+          # mode worth guarding: AltStore would show a broken app entry.
+          assert versions, "no versions"
+          for key in ("name", "bundleIdentifier", "developerName", "iconURL", "localizedDescription"):
+              assert app.get(key), f"app missing {key}"
+          for v in versions:
+              for key in ("version", "buildVersion", "date", "downloadURL", "size"):
+                  assert v.get(key) not in (None, ""), f"version {v.get('version')} missing {key}"
+              assert v["size"] > 0, "zero-size asset"
+          print(f"OK — {len(versions)} version(s), latest {versions[0]['version']}")
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deploy
+        uses: actions/deploy-pages@v5
+
+      - name: Summary
+        run: |
+          {
+            echo "### AltStore source published"
+            echo ""
+            echo "- Source URL: \`https://lms-aqua.github.io/orpheus/altstore.json\`"
+            echo "- Landing page: ${{ steps.deploy.outputs.page_url }}"
+          } >>"$GITHUB_STEP_SUMMARY"

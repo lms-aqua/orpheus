@@ -124,8 +124,10 @@ jobs:
       - name: Simulator used
         if: always()
         run: |
-          echo "Simulator: ${{ steps.sim.outputs.name }}" >>"$GITHUB_STEP_SUMMARY"
-          echo "Runtime: ${{ steps.sim.outputs.runtime }}" >>"$GITHUB_STEP_SUMMARY"
+          {
+            echo "Simulator: ${{ steps.sim.outputs.name }}"
+            echo "Runtime: ${{ steps.sim.outputs.runtime }}"
+          } >>"$GITHUB_STEP_SUMMARY"
 
       - name: Upload logs and result bundles
         if: always()
